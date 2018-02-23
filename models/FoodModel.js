@@ -21,7 +21,10 @@ var FoodSchema = new Schema({
         }],
         default: ['available']
     },
-    categoryId: Schema.ObjectId
+    categoryId: Schema.ObjectId,
+    imgUrl: {
+        type: String
+    },
 });
 // a setter to do something before add database
 FoodSchema.path('name').set( (inputString) => {

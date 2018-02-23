@@ -3,7 +3,7 @@ let Food = require('../models/FoodModel');
 var mongoose = require('mongoose');
 let fs = require('fs');
 router.get('/list-all-foods', (req, res,next) => {
-	Food.find({}).limit(3).sort({name:1}).select({
+	Food.find({}).limit(10).sort({name:1}).select({
         name: 1,
         foodDescription: 1,
         created_dat: 1,
@@ -89,7 +89,13 @@ router.put('/update', (req, res, next) => {
     let newValues = {};
     if(req.body.name && req.body.name.length > 2){
         newValues.name = req.body.name;
-        newValues.foodDescription = req.body.foodDescription;
+    }
+    newValues.foodDescription = req.body.foodDescription;
+    //update image
+    if(req.body.image_name && req.body.image_name.length > 0){
+        const serverName = require("os").hostname();
+        const serverPort = 4000;
+        newValues.imgUrl = `${serverName}:${serverPort}/open_image?image_name=${req.body.image_name}`;
     }
     const options = {
         new: true, //return the modified document rather than the original
@@ -172,6 +178,7 @@ router.get('/open_image', (req, res,next) => {
                 result: "failed",
                 message: "Cannot read file"
             });
+            return;
         }
         res.writeHead(200, {'Content-Type': 'image/jpeg'});
         res.end(imageData); //send the file data to the browser.

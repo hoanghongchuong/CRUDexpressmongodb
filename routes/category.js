@@ -1,8 +1,7 @@
 var router = global.router;
 var mongoose = require('mongoose');
 let Category = require('../models/CategoryModel');
-
-
+let Food = require('../models/FoodModel');
 // router.get('/list_all_category', (req, res, next) => {
 //     Category.find().sort({name: 1}).exec((err, category) => {
 //         if(err){
@@ -120,5 +119,62 @@ router.put('/update_a_category', (req, res, next) => {
         }
     });
 });
-
+// get category width id
+router.get('/get_category_id', (req, res, next) => {
+    var cateId = mongoose.Types.ObjectId(req.query.cate_id);
+    Category.findById(cateId, (err, category) => {
+        if(err){
+            res.json({
+                result: "failed",
+                data: {},
+                message: `Error is ${err}`
+            });
+        }else{
+            res.json({
+                result: "ok",
+                data: category,
+                message: "get category with id successfully"
+            });
+        }
+    });
+});
+// delete a category
+router.delete('/delete_category', (req, res, next) => {
+    Category.findOneAndRemove({_id: mongoose.Types.ObjectId(req.body.category_id)}, (err) => {
+        if(err){
+            res.json({
+                result: "failed",
+                message: `Cannot delete a category. Error is: ${err}`
+            });
+            return;
+        }
+        // delete food with categoryId = req.body.category_id
+        Food.remove({categoryId: mongoose.Types.ObjectId(req.body.category_id)}, (err) => {
+            if(err){
+                res.json({
+                    result: "failed",
+                    message: `Cannot delete food with categoryId: ${req.body.category_id}. Error ${err}`
+                });
+                return;
+            }
+            res.json({
+                result: "ok",
+                message: "Delete category and food with categoryId successfull"
+            });
+        });
+        // Food.findOneAndRemove({categoryId: mongoose.Types.ObjectId(req.body.category_id)}, (err) => {
+        //     if(err){
+        //         res.json({
+        //             result: "failed",
+        //             message: `Cannot delete food with categoryId: ${req.body.category_id}. Error ${err}`
+        //         });
+        //         return;
+        //     }
+        //     res.json({
+        //         result: "ok",
+        //         message: "Delete category and food with categoryId successfull"
+        //     });
+        // });
+    });
+});
 module.exports = router;
